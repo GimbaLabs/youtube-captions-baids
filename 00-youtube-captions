@@ -47,7 +47,7 @@ EOF
 EOF
   fi
 
-  curl ${CURL_ARGS} "${API_BASE_URL}&videoId=${VIDEO_ID}&key=${API_KEY}" \
+  curl -w "%{http_code}" ${CURL_ARGS} "${API_BASE_URL}&videoId=${VIDEO_ID}&key=${API_KEY}" \
     --data @/tmp/yet-set-srt-$$.json \
     --form "media_body=${SRT_FILE}"
 

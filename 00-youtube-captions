@@ -23,7 +23,7 @@ function ytc-set-srt() {
   ytc-init
   CAPTION_ID=$(ytc-list ${VIDEO_ID} | jq -r --arg language "${SRT_LANG}" '.items[] | select(.snippet.language==$language) | .id')
 
-  if [ -z "${CAPTION_ID}" ] 
+  if [ ! -z "${CAPTION_ID}" ]
   then
     cat > /tmp/yet-set-srt-$$.json <<"EOF"
 {

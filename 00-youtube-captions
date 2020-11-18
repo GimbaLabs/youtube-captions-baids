@@ -1,0 +1,54 @@
+#!/bin/bash
+
+function ytc-init() {
+
+  API_BASE_URL="https://youtube.googleapis.com/youtube/v3/captions?part=snippet"
+  CURL_ARGS="-s --header 'Accept: application/json' --compressed"
+
+}
+
+function ytc-list() {
+
+  ytc-init
+  VIDEO_ID=$1
+  curl ${CURL_ARGS} "${API_BASE_URL}&videoId=${VIDEO_ID}&key=${API_KEY}"
+
+}
+
+function ytc-set-srt() {
+
+  VIDEO_ID=$1
+  SRT_LANG=$2
+  SRT_FILE=$3
+  ytc-init
+  CAPTION_ID=$(ytc-list ${VIDEO_ID} | jq -r --arg language "${SRT_LANG}" '.items[] | select(.snippet.language==$language) | .id')
+
+  if [ -z "${CAPTION_ID}" ] 
+  then
+    cat > /tmp/yet-set-srt-$$.json <<"EOF"
+{
+ "id":"${CAPTION_ID}",
+ "snippet": {
+    "language":"${SRT_LANG}",
+    "videoId":"${VIDEO_ID}",
+    "isDraft":false
+ }
+}
+EOF
+  else
+    cat > /tmp/yet-set-srt-$$.json <<"EOF"
+{
+  "snippet": {
+     "language":"${SRT_LANG}",
+     "videoId":"${VIDEO_ID}"
+     "isDraft":false
+  }
+}
+EOF
+  fi
+
+  curl ${CURL_ARGS} "${API_BASE_URL}&videoId=${VIDEO_ID}&key=${API_KEY}" \
+    --data @/tmp/yet-set-srt-$$.json \
+    --form "media_body=${SRT_FILE}"
+
+}
